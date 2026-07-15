@@ -12,8 +12,11 @@ const methodOverride = require("method-override");
 const morgan = require("morgan");
 const session = require('express-session')
 const { MongoStore } = require('connect-mongo')
+const isSignedIn = require('./middleware/is-signed-in.js')
+
 
 const authCtrl = require('./controllers/auth')
+const listingsCtrl = require('./controllers/listing')
 
 // Set the port from environment variable or default to 3000
 const port = process.env.PORT ? process.env.PORT : "3000";
@@ -45,12 +48,16 @@ app.get('/', (req, res) => {
         user: req.session.user,
     })
 })
-
+//AUTH ROUTERS
 app.get('/auth/sign-up', authCtrl.showSignUpForm )
 app.post('/auth/sign-up', authCtrl.signUp)
 app.get('/auth/sign-in', authCtrl.showSignInForm)
 app.post('/auth/sign-in', authCtrl.signIn)
 app.delete('/auth/sign-out', authCtrl.signOut)
+//LISTINGS ROUTERS
+app.get('/listing/new',isSignedIn, listingsCtrl.showNewForm)
+app.post('/listings', isSignedIn, listingsCtrl.create)
+
 
 app.get('/dashboard', async (req, res) => {
     if (!req.session.user){
